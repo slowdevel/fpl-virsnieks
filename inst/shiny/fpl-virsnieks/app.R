@@ -10,7 +10,12 @@ fpl_state <- reactiveValues(
 ui <- fluidPage(
 
   waiter::use_waiter()
-  , waiter::show_waiter_on_load()
+  , waiter::show_waiter_on_load(
+    tagList(
+      waiter::spin_fading_circles()
+      , "loading FPL Virsnieks..."
+    )
+  )
 
   # Application title
   , titlePanel("FPL Virsnieks"),
