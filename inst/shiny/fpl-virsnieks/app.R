@@ -26,10 +26,10 @@ ui <- fluidPage(
   )
 
   # Application title
-  , titlePanel("FPL Virsnieks"),
+  , titlePanel("FPL Virsnieks")
 
   # Sidebar with a slider input for number of bins
-  sidebarLayout(
+  , sidebarLayout(
     sidebarPanel(
       tags$h3(
         "Welcome to Season", textOutput("season", inline=T)
@@ -41,21 +41,27 @@ ui <- fluidPage(
                   min = 1,
                   max = 50,
                   value = 30)
-      , p("System Start Time: "), textOutput("launch_time", inline=F) #, tags$br()
-      , p("Gameweek Update Time: "), textOutput("gw_update_time", inline=F) #, tags$br()
-      , p("Live Update Time: "), textOutput("live_update_time", inline=F) #, tags$br()
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
-      plotOutput("distPlot")
+      DT::DTOutput("dt_fixtures")
+      , plotOutput("distPlot")
     )
   )
+  , fluidRow(
+      column(
+        12
+        , p(strong("System Start Time: "), textOutput("launch_time", inline=T)
+            , strong("Gameweek Update Time: "), textOutput("gw_update_time", inline=T)
+            , strong("Live Update Time: "), textOutput("live_update_time", inline=T)
+        )
+      )
+    )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
 
   output$season <- renderText({ fpl_state$season })
   output$gameweek <- renderText({ fpl_state$gameweek })
@@ -64,6 +70,8 @@ server <- function(input, output) {
   output$launch_time <- renderText({ format(fpl_state$launch_time(), "%Y-%m-%d %H:%M:%S")})
   output$gw_update_time <- renderText({ format(fpl_state$gw_update_time, "%Y-%m-%d %H:%M:%S") })
   output$live_update_time <- renderText({ format(fpl_state$live_update_time, "%Y-%m-%d %H:%M:%S") })
+
+  output$dt_fixtures <- DT::renderDT(fpl_state$fpl_fixtures)
 
   output$distPlot <- renderPlot({
     # generate bins based on input$bins from ui.R
@@ -76,6 +84,7 @@ server <- function(input, output) {
 
   fpl_state$season <- fplVirsnieks::current_season()
 
+  # hide splash screen
   waiter::hide_waiter()
 }
 
