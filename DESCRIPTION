@@ -1,0 +1,18 @@
+Package: fplVirsnieks
+Type: Package
+Title: FPL Virsnieks
+Version: 0.0.1
+Author: Roberts Grava
+Maintainer: Roberts Grava <roberts@grava.net>
+Description: Tools and analytics for evaluating and constructing FPL teams.
+    see https://fantasy.premierleague.com
+License: Authorized use only
+Encoding: UTF-8
+LazyData: true
+Depends:
+    data.table
+    , magrittr
+    , shiny
+Imports: 
+    jsonlite
+    , DT
