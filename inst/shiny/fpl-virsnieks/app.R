@@ -8,6 +8,10 @@ fpl_state <- reactiveValues(
   launch_time = reactiveVal(Sys.time())
 )
 
+# populate fpl_state
+fpl_state <- fplVirsnieks::update_live_fpl(fpl_state)
+
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
 
@@ -27,7 +31,12 @@ ui <- fluidPage(
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
-      tags$h3("Welcome to Season", textOutput("season", inline=T))
+      tags$h3(
+        "Welcome to Season"
+        , textOutput("season", inline=T)
+        , " Gameweek "
+        , textOutput("gameweek", inline=T)
+        )
       , sliderInput("bins",
                   "Number of bins:",
                   min = 1,
@@ -48,9 +57,9 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-  output$season <- renderText({
-    fpl_state$season
-  })
+
+  output$season <- renderText({ fpl_state$season })
+  output$gameweek <- renderText({ fpl_state$gameweek })
 
   output$launch_time <- renderText({ format(fpl_state$launch_time(), "%Y-%m-%d %H:%M:%S")})
   output$gw_update_time <- renderText({ format(fpl_state$gw_update_time, "%Y-%m-%d %H:%M:%S") })
