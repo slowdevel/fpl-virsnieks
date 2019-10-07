@@ -1,6 +1,7 @@
 fplVirsnieks::clr()
 
 library(shiny)
+library(fplVirsnieks)
 
 
 fpl_state <- reactiveValues(
@@ -10,7 +11,6 @@ fpl_state <- reactiveValues(
 
 # populate fpl_state
 fpl_state <- fplVirsnieks::update_live_fpl(fpl_state)
-
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
