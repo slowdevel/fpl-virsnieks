@@ -9,8 +9,11 @@ fpl_state <- reactiveValues(
 # Define UI for application that draws a histogram
 ui <- fluidPage(
 
+  waiter::use_waiter()
+  , waiter::show_waiter_on_load()
+
   # Application title
-  titlePanel("FPL Virsnieks"),
+  , titlePanel("FPL Virsnieks"),
 
   # Sidebar with a slider input for number of bins
   sidebarLayout(
@@ -47,6 +50,8 @@ server <- function(input, output) {
   })
 
   fpl_state$season <- fplVirsnieks::current_season()
+
+  waiter::hide_waiter()
 }
 
 # Run the application

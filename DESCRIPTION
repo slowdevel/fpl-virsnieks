@@ -16,3 +16,4 @@ Depends:
 Imports: 
     jsonlite
     , DT
+    , waiter
