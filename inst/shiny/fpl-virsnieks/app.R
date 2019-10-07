@@ -1,4 +1,7 @@
+fplVirsnieks::clr()
+
 library(shiny)
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -9,7 +12,9 @@ ui <- fluidPage(
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
-      sliderInput("bins",
+      tags$h3("Welcome to Season")
+      , textOutput("season")
+      , sliderInput("bins",
                   "Number of bins:",
                   min = 1,
                   max = 50,
@@ -25,6 +30,11 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+
+  season <- fplVirsnieks::current_season()
+  output$season <- renderText({
+    season
+  })
 
   output$distPlot <- renderPlot({
     # generate bins based on input$bins from ui.R

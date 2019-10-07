@@ -1,0 +1,20 @@
+#' Clears the global environment and console
+#' @export
+clr <- function() {
+  rm(list=ls(envir=.GlobalEnv), envir=.GlobalEnv)
+  library(fplVirsnieks)
+  cat("\014")
+}
+
+#' Calculates current FPL season based on current date
+#' @export
+current_season <- function() {
+  year <- as.numeric(lubridate::year(Sys.time())) - 2000
+  month <- as.numeric(lubridate::month(Sys.time()))
+  if (month < 7) { # end of the season
+    y <- year - 1
+  } else { # beginning of the season
+    y <- year
+  }
+  return(as.numeric(paste0(y, y+1)))
+}
