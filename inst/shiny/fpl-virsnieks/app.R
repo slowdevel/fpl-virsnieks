@@ -2,6 +2,9 @@ fplVirsnieks::clr()
 
 library(shiny)
 
+fpl_state <- reactiveValues(
+  season = "----"
+)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -31,9 +34,9 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-  season <- fplVirsnieks::current_season()
+  fpl_stats$season <- fplVirsnieks::current_season()
   output$season <- renderText({
-    season
+    fpl_state$season
   })
 
   output$distPlot <- renderPlot({
