@@ -15,8 +15,7 @@ ui <- fluidPage(
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
-      tags$h3("Welcome to Season")
-      , textOutput("season")
+      tags$h3("Welcome to Season", textOutput("season", inline=T))
       , sliderInput("bins",
                   "Number of bins:",
                   min = 1,
@@ -34,7 +33,6 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-  fpl_stats$season <- fplVirsnieks::current_season()
   output$season <- renderText({
     fpl_state$season
   })
@@ -47,6 +45,8 @@ server <- function(input, output) {
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white')
   })
+
+  fpl_state$season <- fplVirsnieks::current_season()
 }
 
 # Run the application
