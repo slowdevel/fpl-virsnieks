@@ -32,10 +32,9 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       tags$h3(
-        "Welcome to Season"
-        , textOutput("season", inline=T)
-        , " Gameweek "
-        , textOutput("gameweek", inline=T)
+        "Welcome to Season", textOutput("season", inline=T)
+        , " Gameweek ", textOutput("gameweek", inline=T)
+        , " ", textOutput("gw_status", inline=T)
         )
       , sliderInput("bins",
                   "Number of bins:",
@@ -60,6 +59,7 @@ server <- function(input, output) {
 
   output$season <- renderText({ fpl_state$season })
   output$gameweek <- renderText({ fpl_state$gameweek })
+  output$gw_status <- renderText({ fpl_state$gameweek_status })
 
   output$launch_time <- renderText({ format(fpl_state$launch_time(), "%Y-%m-%d %H:%M:%S")})
   output$gw_update_time <- renderText({ format(fpl_state$gw_update_time, "%Y-%m-%d %H:%M:%S") })
