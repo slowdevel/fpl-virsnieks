@@ -1,13 +1,9 @@
 #' Updates live fpl_state
 #'
-#' update_entire_gameweek parameter, T or F
+#' full_update parameter, T or F
 #' @export
-update_live_fpl <- function(state, update_entire_gameweek=F) {
-  if (update_entire_gameweek) {
-    # gameweek stuff
-  }
-  # set gw_update_time when gameweek updates are done
-  state$gw_update_time <- Sys.time()
+update_live_fpl <- function(state, full_update=F) {
+  season <- fplVirsnieks::current_season()
 
   # -------------------------------------------------------------------------
   # live fpl queries
@@ -22,6 +18,23 @@ update_live_fpl <- function(state, update_entire_gameweek=F) {
   # fpl_roster
   fpl_roster <- create_fpl_roster(json_fpl_now)
 
+  # update once-per-gameweek info
+  if (full_update) {
+    # once-per-gameweek stuff
+    fantasy_snapshot <- fplVirsnieks::get_fantasy_snapshot(season, gameweek)
+    # fantasy_season_player_ix <- get_fantasy_season_player_ix(fantasy_snapshot)
+    # fantasy_gameweek_player_ix <- get_fantasy_gameweek_player_ix(fantasy_snapshot, gameweek)
+
+    # assign once-per-week objects
+    state$fantasy_key <- fplVirsnieks::read_dt("fantasy_key.csv")
+    state$fantasy_snapshot <- fantasy_snapshot
+    # state$fantasy_season_player_ix <- fantasy_season_player_ix
+    # state$fantasy_gameweek_player_ix <- fantasy_gameweek_player_ix
+
+    # set gw_update_time when gameweek updates are done
+    state$gw_update_time <- Sys.time()
+  }
+
   # fpl_fixtures
   json_fpl_fixtures <- jsonlite::fromJSON(fplVirsnieks::FPL_FIXTURES_URL)
   # table from json
@@ -35,11 +48,10 @@ update_live_fpl <- function(state, update_entire_gameweek=F) {
   gameweek_status <- fplVirsnieks::GAMEWEEK_STATUS_TEXT[gameweek_status_level]
 
   # fpl_live
-  fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_EVENT_URL, gameweek, "/live/"), flatten=T)
-
-  # tables from live data
+  json_fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_EVENT_URL, gameweek, "/live/"), flatten=T)
 
   # assign to state
+  state$season <- season
   state$gameweek <- gameweek
   state$gameweek_status <- gameweek_status
   state$fpl_fixtures <- fpl_fixtures

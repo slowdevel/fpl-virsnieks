@@ -9,47 +9,50 @@ fpl_state <- reactiveValues(
   launch_time = reactiveVal(Sys.time())
 )
 
-# populate fpl_state
-fpl_state <- fplVirsnieks::update_live_fpl(fpl_state)
-
 # Define UI for application that draws a histogram
 ui <- navbarPage(
   "fpl.grava.net"
 
   , tabPanel(
-    "Fixtures"
+    "Fantasy"
 
-    # Sidebar with a slider input for number of bins
     , fluidRow(
       column( 4
+        , selectInput("select_manager", "Manager", "", width = '100px')
+      )
+      , column( 8
+        , DT::DTOutput("dt_fantasy_key")
+      )
+    )
+  )
+
+  , tabPanel(
+    "PL Gameweek"
+
+    , fluidRow(
+      column( 4
+        , selectInput("select_gameweek", "Gameweek", "", width = '60px')
         , DT::DTOutput("dt_fixtures")
       )
       , column( 8
         , uiOutput("gw_details")
       )
     )
-    # , sidebarLayout(
-    #   sidebarPanel(
-    #   ),
-    #
-    #   # Show a plot of the generated distribution
-    #   mainPanel(
-    #     DT::DTOutput("dt_fixtures")
-    #     , uiOutput("gw_details")
-    #   )
-    # )
   ) # tabPanel Fixtures
 
   , tabPanel(
     "Teams"
-  )
+  ) # tabPanel Teams
 
   , header = fluidRow(
     # season and gamewek info
-    tags$h3(
-      "Welcome to Season", textOutput("season", inline=T)
-      , " Gameweek ", textOutput("gameweek", inline=T)
-      , " ", textOutput("gw_status", inline=T)
+    column( 12
+      , h4(
+        "Season", textOutput("season", inline=T)
+        , " Gameweek ", textOutput("gameweek", inline=T)
+        , " ", textOutput("gw_status", inline=T)
+      )
+
     )
     # splash screen
     , waiter::use_waiter()
@@ -60,9 +63,7 @@ ui <- navbarPage(
         , p(style="color: white", "loading FPL Virsnieks...")
       )
     )
-
-
-  )
+  ) # header
 
   , footer = fluidRow(
     column(
@@ -70,13 +71,17 @@ ui <- navbarPage(
       , p(strong("System Start Time: "), textOutput("launch_time", inline=T)
           , strong("Gameweek Update Time: "), textOutput("gw_update_time", inline=T)
           , strong("Live Update Time: "), textOutput("live_update_time", inline=T)
-      )
-    )
-  )
+      ) # p
+    ) # column
+  ) # footer
+
 )
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
+
+  # populate fpl_state
+  fpl_state <- fplVirsnieks::update_live_fpl(fpl_state, full_update=T)
 
   output$season <- renderText({ fpl_state$season })
   output$gameweek <- renderText({ fpl_state$gameweek })
@@ -86,10 +91,31 @@ server <- function(input, output) {
   output$gw_update_time <- renderText({ format(fpl_state$gw_update_time, "%Y-%m-%d %H:%M:%S") })
   output$live_update_time <- renderText({ format(fpl_state$live_update_time, "%Y-%m-%d %H:%M:%S") })
 
+  observe({
+    # populate gameweek dropdown with gameweeks
+    updateSelectInput(session, "select_gameweek"
+                      , choices = seq(1, 38) #fpl_state$gameweek)
+                      , selected = fpl_state$gameweek)
+    # populate manager dropdown with manager list for current season
+    manager_list <- fpl_state$fantasy_key[
+      season==fpl_state$season
+      , fantasy_manager
+      ]
+    updateSelectInput(session, "select_manager"
+                      , choices = setNames(seq(1,length(manager_list)), manager_list)
+                      , selected = 1)
+  })
+
   gw_fixtures <- reactive(fplVirsnieks::query_gw_fixtures(
     fpl_state$fpl_fixtures
-    , fpl_state$gameweek
+    , input$select_gameweek
   ))
+
+  output$dt_fantasy_key <- DT::renderDT({
+    # fplVirsnieks::read_dt("fantasy_key.csv")
+    fpl_state$fantasy_key
+  })
+
   output$dt_fixtures <- DT::renderDT(
     fplVirsnieks::format_gw_fixtures(
       gw_fixtures()
@@ -97,27 +123,12 @@ server <- function(input, output) {
   )
 
   output$gw_details <- renderUI({
-    # HTML("<strong>Poopa</strong>")
-
     HTML(fplVirsnieks::html_fixture_stats(fpl_state$fpl_fixtures
                                        , gw_fixtures()[input$dt_fixtures_rows_selected, id]
                                        , fpl_state$fpl_roster
                                        )
       )
-
-    # p(length(gw_fixtures()[input$dt_fixtures_rows_selected, id]))
   })
-
-  # output$distPlot <- renderPlot({
-  #   # generate bins based on input$bins from ui.R
-  #   x    <- faithful[, 2]
-  #   bins <- seq(min(x), max(x), length.out = input$bins + 1)
-  #
-  #   # draw the histogram with the specified number of bins
-  #   hist(x, breaks = bins, col = 'darkgray', border = 'white')
-  # })
-
-  fpl_state$season <- fplVirsnieks::current_season()
 
   # hide splash screen
   waiter::hide_waiter()

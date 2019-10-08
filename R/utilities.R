@@ -18,3 +18,15 @@ current_season <- function() {
   }
   return(as.numeric(paste0(y, y+1)))
 }
+
+#' Gets .csv file via data.table::fread from /inst/extdata/directory
+#' @export
+read_dt <- function(filename) {
+  return(
+    data.table::fread(
+      system.file(
+        "data"
+        , filename
+        , package="fplVirsnieks"))
+  )
+}
