@@ -60,22 +60,22 @@ html_fixture_stats <- function(fixtures, fixture_id, roster) {
     stats <- fixtures[id==fixture_id, stats][[1]]
     team_h_name <- fixtures[id==fixture_id, team_h_name]
     team_a_name <- fixtures[id==fixture_id, team_a_name]
-    tbl <- "<table>"
-    tbl <- paste0(tbl, "<tr><th>", team_h_name, "</th><th>", team_a_name, "</th></tr>")
+    tbl <- "<table width='100%'>"
+    tbl <- paste0(tbl, "<tr><th style = 'text-align: right;'>", team_h_name, "</th><th style = 'text-align: left;'>", team_a_name, "</th></tr>")
     if (nrow(stats) > 0) {
       for (i in 1:nrow(stats)) {
         num_h <- nrow(stats$h[i][[1]])
         num_a <- nrow(stats$a[i][[1]])
         num_max <- max(num_h, num_a)
         if (num_max > 0) {
-          tbl <- paste0(tbl, "<tr><th colspan='2'>", stats$identifier[i], "</th></tr>")
+          tbl <- paste0(tbl, "<tr><th colspan='2' style = 'text-align: center;'>", stats$identifier[i], "</th></tr>")
           for (j in 1:num_max) {
             tbl <- paste0(tbl, "<tr>")
             if (num_h >= j) {
               player <- find_player(stats$h[i][[1]]$element[j], roster)
               tbl <- paste0(
                 tbl
-                , "<td>"
+                , "<td style = 'text-align: right;'>"
                 , player$fpl_name, " ", player$fpl_pos, ": "
                 , stats$h[i][[1]]$value[j]
                 , "</td>")
@@ -86,7 +86,7 @@ html_fixture_stats <- function(fixtures, fixture_id, roster) {
               player <- find_player(stats$a[i][[1]]$element[j], roster)
               tbl <- paste0(
                 tbl
-                , "<td>"
+                , "<td style = 'text-align: left;'>"
                 , player$fpl_name, " ", player$fpl_pos, ": "
                 , stats$a[i][[1]]$value[j]
                 , "</td>")

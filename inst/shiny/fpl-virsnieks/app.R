@@ -13,44 +13,46 @@ fpl_state <- reactiveValues(
 fpl_state <- fplVirsnieks::update_live_fpl(fpl_state)
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- navbarPage(
+  "fpl.grava.net"
 
-  # splash screen
-  waiter::use_waiter()
-  , waiter::show_waiter_on_load(
-    tagList(
-      waiter::spin_fading_circles()
-      , br()
-      , p(style="color: white", "loading FPL Virsnieks...")
+  , tabPanel(
+    "Fixtures"
+    # splash screen
+    , waiter::use_waiter()
+    , waiter::show_waiter_on_load(
+      tagList(
+        waiter::spin_fading_circles()
+        , br()
+        , p(style="color: white", "loading FPL Virsnieks...")
+      )
     )
-  )
+    # Application title
+    , titlePanel("FPL Virsnieks")
 
-  # Application title
-  , titlePanel("FPL Virsnieks")
-
-  # Sidebar with a slider input for number of bins
-  , sidebarLayout(
-    sidebarPanel(
-      tags$h3(
-        "Welcome to Season", textOutput("season", inline=T)
-        , " Gameweek ", textOutput("gameweek", inline=T)
-        , " ", textOutput("gw_status", inline=T)
+    # Sidebar with a slider input for number of bins
+    , sidebarLayout(
+      sidebarPanel(
+        tags$h3(
+          "Welcome to Season", textOutput("season", inline=T)
+          , " Gameweek ", textOutput("gameweek", inline=T)
+          , " ", textOutput("gw_status", inline=T)
         )
-      # , sliderInput("bins",
-      #             "Number of bins:",
-      #             min = 1,
-      #             max = 50,
-      #             value = 30)
-    ),
+        # , sliderInput("bins",
+        #             "Number of bins:",
+        #             min = 1,
+        #             max = 50,
+        #             value = 30)
+      ),
 
-    # Show a plot of the generated distribution
-    mainPanel(
-      DT::DTOutput("dt_fixtures")
-      , uiOutput("gw_details")
-      # , plotOutput("distPlot")
+      # Show a plot of the generated distribution
+      mainPanel(
+        DT::DTOutput("dt_fixtures")
+        , uiOutput("gw_details")
+        # , plotOutput("distPlot")
+      )
     )
-  )
-  , fluidRow(
+    , fluidRow(
       column(
         12
         , p(strong("System Start Time: "), textOutput("launch_time", inline=T)
@@ -59,6 +61,12 @@ ui <- fluidPage(
         )
       )
     )
+  ) # tabPanel Fixtures
+
+  , tabPanel(
+    "Teams"
+  )
+
 )
 
 # Define server logic required to draw a histogram
