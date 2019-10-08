@@ -36,17 +36,18 @@ ui <- fluidPage(
         , " Gameweek ", textOutput("gameweek", inline=T)
         , " ", textOutput("gw_status", inline=T)
         )
-      , sliderInput("bins",
-                  "Number of bins:",
-                  min = 1,
-                  max = 50,
-                  value = 30)
+      # , sliderInput("bins",
+      #             "Number of bins:",
+      #             min = 1,
+      #             max = 50,
+      #             value = 30)
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
       DT::DTOutput("dt_fixtures")
-      , plotOutput("distPlot")
+      , uiOutput("gw_details")
+      # , plotOutput("distPlot")
     )
   )
   , fluidRow(
@@ -71,18 +72,36 @@ server <- function(input, output) {
   output$gw_update_time <- renderText({ format(fpl_state$gw_update_time, "%Y-%m-%d %H:%M:%S") })
   output$live_update_time <- renderText({ format(fpl_state$live_update_time, "%Y-%m-%d %H:%M:%S") })
 
+  gw_fixtures <- reactive(fplVirsnieks::query_gw_fixtures(
+    fpl_state$fpl_fixtures
+    , fpl_state$gameweek
+  ))
   output$dt_fixtures <- DT::renderDT(
-    fplVirsnieks::query_gw_fixtures(fpl_state$fpl_fixtures, fpl_state$gameweek)
+    fplVirsnieks::format_gw_fixtures(
+      gw_fixtures()
+    )
   )
 
-  output$distPlot <- renderPlot({
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2]
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
+  output$gw_details <- renderUI({
+    # HTML("<strong>Poopa</strong>")
 
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')
+    HTML(fplVirsnieks::html_fixture_stats(fpl_state$fpl_fixtures
+                                       , gw_fixtures()[input$dt_fixtures_rows_selected, id]
+                                       , fpl_state$fpl_roster
+                                       )
+      )
+
+    # p(length(gw_fixtures()[input$dt_fixtures_rows_selected, id]))
   })
+
+  # output$distPlot <- renderPlot({
+  #   # generate bins based on input$bins from ui.R
+  #   x    <- faithful[, 2]
+  #   bins <- seq(min(x), max(x), length.out = input$bins + 1)
+  #
+  #   # draw the histogram with the specified number of bins
+  #   hist(x, breaks = bins, col = 'darkgray', border = 'white')
+  # })
 
   fpl_state$season <- fplVirsnieks::current_season()
 

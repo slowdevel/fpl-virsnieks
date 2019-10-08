@@ -19,6 +19,9 @@ update_live_fpl <- function(state, update_entire_gameweek=F) {
   # gameweek from fpl_now
   gameweek <- which(json_fpl_now$events$is_current == T)
 
+  # fpl_roster
+  fpl_roster <- create_fpl_roster(json_fpl_now)
+
   # fpl_fixtures
   json_fpl_fixtures <- jsonlite::fromJSON(fplVirsnieks::FPL_FIXTURES_URL)
   # table from json
@@ -40,6 +43,7 @@ update_live_fpl <- function(state, update_entire_gameweek=F) {
   state$gameweek <- gameweek
   state$gameweek_status <- gameweek_status
   state$fpl_fixtures <- fpl_fixtures
+  state$fpl_roster <- fpl_roster
 
   # set live_update_time when live updates are done
   state$live_update_time <- Sys.time()
@@ -77,3 +81,43 @@ create_fpl_fixtures <- function(json_fpl_fixtures, fpl_teams) {
   return(fpl_fixtures)
 }
 
+#' Creates and returns FPL roster
+#' @export
+create_fpl_roster <- function(fpl_now) {
+  fpl_roster <- data.table(fpl_now$elements)[
+    , .(
+      fpl_name=web_name
+      , fpl_player_id=id
+      , fpl_player_code=code
+      , fpl_team_id=team
+      , fpl_pos_id=element_type)
+    ][
+      data.table(fpl_now$element_types)[ , .(fpl_pos_id=id, fpl_pos=singular_name_short)]
+      , , on=("fpl_pos_id")
+      ][
+        data.table(fpl_now$teams)[ , .(fpl_team_id=id, fpl_team_code=code, fpl_team=short_name)]
+        , , on=("fpl_team_id")
+        ][
+          order(fpl_name, fpl_team, fpl_pos)
+          , .(
+            player_name = paste(
+              fpl_name, fpl_team, fpl_pos
+            )
+            , fpl_name
+            , fpl_team
+            , fpl_pos
+            , fpl_player_id
+            , fpl_player_code
+            , fpl_team_id
+            , fpl_team_code
+            , fpl_pos_id
+          )
+          ]
+  return(fpl_roster)
+}
+
+# Finds and returns player roster info given player id
+#' @export
+find_player <- function(id, roster) {
+  return(roster[fpl_player_id==id])
+}
