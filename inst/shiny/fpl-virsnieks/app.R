@@ -18,6 +18,39 @@ ui <- navbarPage(
 
   , tabPanel(
     "Fixtures"
+
+    # Sidebar with a slider input for number of bins
+    , fluidRow(
+      column( 4
+        , DT::DTOutput("dt_fixtures")
+      )
+      , column( 8
+        , uiOutput("gw_details")
+      )
+    )
+    # , sidebarLayout(
+    #   sidebarPanel(
+    #   ),
+    #
+    #   # Show a plot of the generated distribution
+    #   mainPanel(
+    #     DT::DTOutput("dt_fixtures")
+    #     , uiOutput("gw_details")
+    #   )
+    # )
+  ) # tabPanel Fixtures
+
+  , tabPanel(
+    "Teams"
+  )
+
+  , header = fluidRow(
+    # season and gamewek info
+    tags$h3(
+      "Welcome to Season", textOutput("season", inline=T)
+      , " Gameweek ", textOutput("gameweek", inline=T)
+      , " ", textOutput("gw_status", inline=T)
+    )
     # splash screen
     , waiter::use_waiter()
     , waiter::show_waiter_on_load(
@@ -27,46 +60,19 @@ ui <- navbarPage(
         , p(style="color: white", "loading FPL Virsnieks...")
       )
     )
-    # Application title
-    , titlePanel("FPL Virsnieks")
 
-    # Sidebar with a slider input for number of bins
-    , sidebarLayout(
-      sidebarPanel(
-        tags$h3(
-          "Welcome to Season", textOutput("season", inline=T)
-          , " Gameweek ", textOutput("gameweek", inline=T)
-          , " ", textOutput("gw_status", inline=T)
-        )
-        # , sliderInput("bins",
-        #             "Number of bins:",
-        #             min = 1,
-        #             max = 50,
-        #             value = 30)
-      ),
 
-      # Show a plot of the generated distribution
-      mainPanel(
-        DT::DTOutput("dt_fixtures")
-        , uiOutput("gw_details")
-        # , plotOutput("distPlot")
-      )
-    )
-    , fluidRow(
-      column(
-        12
-        , p(strong("System Start Time: "), textOutput("launch_time", inline=T)
-            , strong("Gameweek Update Time: "), textOutput("gw_update_time", inline=T)
-            , strong("Live Update Time: "), textOutput("live_update_time", inline=T)
-        )
-      )
-    )
-  ) # tabPanel Fixtures
-
-  , tabPanel(
-    "Teams"
   )
 
+  , footer = fluidRow(
+    column(
+      12
+      , p(strong("System Start Time: "), textOutput("launch_time", inline=T)
+          , strong("Gameweek Update Time: "), textOutput("gw_update_time", inline=T)
+          , strong("Live Update Time: "), textOutput("live_update_time", inline=T)
+      )
+    )
+  )
 )
 
 # Define server logic required to draw a histogram
