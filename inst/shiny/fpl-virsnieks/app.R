@@ -18,10 +18,10 @@ ui <- navbarPage(
 
     , fluidRow(
       column( 4
-        , selectInput("select_manager", "Manager", "", width = '100px')
+        , selectInput("select_manager", "Manager", "", width = '120px')
       )
       , column( 8
-        , DT::DTOutput("dt_fantasy_key")
+        , DT::DTOutput("dt_fantasy_history")
       )
     )
   )
@@ -111,9 +111,9 @@ server <- function(input, output, session) {
     , input$select_gameweek
   ))
 
-  output$dt_fantasy_key <- DT::renderDT({
-    # fplVirsnieks::read_dt("fantasy_key.csv")
-    fpl_state$fantasy_key
+  output$dt_fantasy_history <- DT::renderDT({
+    fpl_state$fantasy_snapshot[[as.numeric(input$select_manager)]]$history
+    # fpl_state$fantasy_key[season==fpl_state$season]
   })
 
   output$dt_fixtures <- DT::renderDT(

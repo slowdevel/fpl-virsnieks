@@ -1,6 +1,7 @@
 #" Queries fpl_fixtures for given gameweek data
 #' @export
 query_gw_fixtures <- function(fpl_fixtures, gameweek) {
+  setkeyv(fpl_fixtures, c("kickoff_time", "id"))
   res <-
     fpl_fixtures[
       event==gameweek
@@ -10,13 +11,15 @@ query_gw_fixtures <- function(fpl_fixtures, gameweek) {
         , h = team_h_score
         , a = team_a_score
         , away = team_a_name
-        , time = kickoff_time
+        # , time = kickoff_time
+        # , time = format(kickoff_time, "%m.%d")
+        # , time = format(kickoff_time, "%a %m/%d %H:%M", tz="Europe/London")
+        , time = format(lubridate::as_datetime(kickoff_time), "%a %m/%d %H:%M", tz="Europe/London")
         , status_level
         , status
         , id
       )
     ]
-  setkey(res, id)
   return(res)
 }
 
