@@ -76,3 +76,4 @@ create_fpl_fixtures <- function(json_fpl_fixtures, fpl_teams) {
     ]
   return(fpl_fixtures)
 }
+

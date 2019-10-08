@@ -71,7 +71,9 @@ server <- function(input, output) {
   output$gw_update_time <- renderText({ format(fpl_state$gw_update_time, "%Y-%m-%d %H:%M:%S") })
   output$live_update_time <- renderText({ format(fpl_state$live_update_time, "%Y-%m-%d %H:%M:%S") })
 
-  output$dt_fixtures <- DT::renderDT(fpl_state$fpl_fixtures)
+  output$dt_fixtures <- DT::renderDT(
+    fplVirsnieks::query_gw_fixtures(fpl_state$fpl_fixtures, fpl_state$gameweek)
+  )
 
   output$distPlot <- renderPlot({
     # generate bins based on input$bins from ui.R
