@@ -3,6 +3,8 @@
 #' full_update parameter, T or F
 #' @export
 update_live_fpl <- function(state, full_update=F) {
+  # waiter::show_waiter()
+
   season <- fplVirsnieks::current_season()
 
   # -------------------------------------------------------------------------
@@ -66,6 +68,7 @@ update_live_fpl <- function(state, full_update=F) {
   # set live_update_time when live updates are done
   state$live_update_time <- Sys.time()
 
+  # waiter::hide_waiter()
   return(state)
 }
 

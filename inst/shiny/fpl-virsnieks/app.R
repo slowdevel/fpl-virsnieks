@@ -68,6 +68,8 @@ ui <- navbarPage(
         , " Gameweek ", textOutput("gameweek", inline=T)
         , " ", textOutput("gw_status", inline=T)
       )
+      , fplVirsnieks::button_ui("button_update_gw", "Update GW")
+      , fplVirsnieks::button_ui("button_update_live", "Update Live")
 
     )
     # splash screen
@@ -98,6 +100,9 @@ server <- function(input, output, session) {
 
   # populate fpl_state
   fpl_state <- fplVirsnieks::update_live_fpl(fpl_state, full_update=T)
+
+  callModule(button_update_gw, "button_update_gw", fpl_state)
+  callModule(button_update_live, "button_update_live", fpl_state)
 
   output$season <- renderText({ fpl_state$season })
   output$gameweek <- renderText({ fpl_state$gameweek })
