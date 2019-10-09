@@ -1,0 +1,56 @@
+---
+title: "PL Teams"
+output: html_notebook
+---
+
+```{r}
+fpl_fixtures <- data.table(jsonlite::fromJSON("https://fantasy.premierleague.com/api/fixtures/"))
+fpl_fixtures[]
+```
+```{r}
+team_ids <- sort(unique(fpl_fixtures[,team_h]))
+team_hist <- rbindlist(lapply(team_ids
+  , function(x) 
+    fpl_fixtures[
+    team_a==x | team_h==x
+    , .(
+      # original fixture fields
+      event
+      , id
+      , code
+      , kickoff_time
+      , started
+      , finished_provisional
+      , finished
+      , minutes
+      , provisional_start_time
+      , stats
+      # hame and away recalced to team and team_opp
+      , at_home = team_h==x
+      , team_id = ifelse(team_h==x, team_h, team_a)
+      , team_opp_id = ifelse(team_h==x, team_a, team_h)
+      , team_score = ifelse(team_h==x, team_h_score, team_a_score)
+      , team_opp_score = ifelse(team_h==x, team_a_score, team_h_score)
+      , team_difficulty = ifelse(team_h==x, team_h_difficulty, team_a_difficulty)
+      , team_opp_difficulty = ifelse(team_h==x, team_a_difficulty, team_h_difficulty)
+      )
+    ][
+      , ':=' (
+        wld = ifelse(team_score > team_opp_score, 1
+                     , ifelse(team_score < team_opp_score, -1, 0))
+        , points = ifelse(team_score > team_opp_score, 3
+                     , ifelse(team_score < team_opp_score, 0, 1))
+        , goal_difference = team_score - team_opp_score
+      )
+    ][
+      , ':=' (
+        cum_points = cumsum(points)
+      )
+      , team_id
+    ]
+)
+)
+setkeyv(team_hist, c("team_id", "kickoff_time"))
+team_hist[]
+```
+

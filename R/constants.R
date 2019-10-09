@@ -11,6 +11,12 @@ FPL_FIXTURES_URL <- "https://fantasy.premierleague.com/api/fixtures/"
 FPL_EVENT_URL <- "https://fantasy.premierleague.com/api/event/"
 
 #' Root URL for FPL /entry/ - Fantasy Team
+#'
+#' Needs entry code / team id and suffix, e.g.:
+#' paste0("https://fantasy.premierleague.com/api/entry/", <id> , "/")
+#' paste0("https://fantasy.premierleague.com/api/entry/", <id> , "/history/")
+#' paste0("https://fantasy.premierleague.com/api/entry/", <id> , "/transfers/")
+#' paste0("https://fantasy.premierleague.com/api/entry/", <id> , "/event/", <gameweek>, "/picks/")
 #' @export
 FPL_ENTRY_URL <- "https://fantasy.premierleague.com/api/entry/"
 

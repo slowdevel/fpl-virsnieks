@@ -47,6 +47,9 @@ update_live_fpl <- function(state, full_update=F) {
   gameweek_status_level <- 1 + gameweek_started + gameweek_finished + gameweek_final
   gameweek_status <- fplVirsnieks::GAMEWEEK_STATUS_TEXT[gameweek_status_level]
 
+  # team history
+  team_history <- fplVirsnieks::create_team_history(fpl_fixtures, fpl_teams)
+
   # fpl_live
   json_fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_EVENT_URL, gameweek, "/live/"), flatten=T)
 
@@ -56,6 +59,7 @@ update_live_fpl <- function(state, full_update=F) {
   state$gameweek_status <- gameweek_status
   state$fpl_fixtures <- fpl_fixtures
   state$fpl_roster <- fpl_roster
+  state$team_history <- team_history
 
   # set live_update_time when live updates are done
   state$live_update_time <- Sys.time()
@@ -132,4 +136,66 @@ create_fpl_roster <- function(fpl_now) {
 #' @export
 find_player <- function(id, roster) {
   return(roster[fpl_player_id==id])
+}
+
+#' Creates and returns FPL team history
+#' @export
+create_team_history <- function(fixtures, teams) {
+  team_ids <- sort(unique(fixtures[,team_h]))
+  team_hist <-
+    rbindlist(
+      lapply(
+        team_ids
+        , function(x)
+          fixtures[
+            team_a==x | team_h==x
+            , .(
+              # original fixture fields
+              event
+              , id
+              , code
+              , kickoff_time
+              , started
+              , finished_provisional
+              , finished
+              , minutes
+              , provisional_start_time
+              , stats
+              # hame and away recalced to team and team_opp
+              , at_home = team_h==x
+              , team_id = ifelse(team_h==x, team_h, team_a)
+              , team_opp_id = ifelse(team_h==x, team_a, team_h)
+              , team_score = ifelse(team_h==x, team_h_score, team_a_score)
+              , team_opp_score = ifelse(team_h==x, team_a_score, team_h_score)
+              , team_difficulty = ifelse(team_h==x, team_h_difficulty, team_a_difficulty)
+              , team_opp_difficulty = ifelse(team_h==x, team_a_difficulty, team_h_difficulty)
+            )
+            ][
+              teams
+              , team := i.short_name
+              , on = ("team_id==id")
+              ][
+                teams
+                , team_opp_name := i.short_name
+                , on = ("team_opp_id==id")
+                ][
+                  , ':=' (
+                    wld = ifelse(team_score > team_opp_score, 1
+                                 , ifelse(team_score < team_opp_score, -1, 0))
+                    , points = ifelse(team_score > team_opp_score, 3
+                                      , ifelse(team_score < team_opp_score, 0, 1))
+                    , goal_difference = team_score - team_opp_score
+                    )
+                  ][
+                    , ':=' (
+                      cum_points = cumsum(points)
+                      , cum_goal_difference = cumsum(goal_difference)
+                      , cum_goals = cumsum(team_score)
+                      )
+                    , team_id
+                    ]
+      )
+    )
+
+  return(team_hist)
 }

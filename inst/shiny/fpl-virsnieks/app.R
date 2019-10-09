@@ -42,6 +42,12 @@ ui <- navbarPage(
 
   , tabPanel(
     "Teams"
+
+    , fluidRow(
+      column( 6
+        , DT::DTOutput("dt_team_history")
+      )
+    )
   ) # tabPanel Teams
 
   , header = fluidRow(
@@ -120,6 +126,10 @@ server <- function(input, output, session) {
     fplVirsnieks::format_gw_fixtures(
       gw_fixtures()
     )
+  )
+
+  output$dt_team_history <- DT::renderDT(
+    fpl_state$team_history[ , -c("stats"), with=F]
   )
 
   output$gw_details <- renderUI({
