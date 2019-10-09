@@ -13,10 +13,10 @@ get_fantasy_snapshot <- function(current_season, gameweek) {
 
     history_url <- paste0(FPL_ENTRY_URL, fantasy_key$fantasy_team_code[t], '/history/')
     entry_history <- jsonlite::fromJSON(history_url)
-    history <- entry_history$current
+    history <- data.table(entry_history$current)
 
     transfers_url <- paste0(FPL_ENTRY_URL, fantasy_key$fantasy_team_code[t], '/transfers/')
-    transfers <- jsonlite::fromJSON(transfers_url)
+    transfers <- data.table(jsonlite::fromJSON(transfers_url))
 
     picks <- NULL
     for (g in 1:gameweek) {

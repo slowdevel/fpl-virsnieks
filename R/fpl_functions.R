@@ -24,12 +24,14 @@ update_live_fpl <- function(state, full_update=F) {
     fantasy_snapshot <- fplVirsnieks::get_fantasy_snapshot(season, gameweek)
     # fantasy_season_player_ix <- get_fantasy_season_player_ix(fantasy_snapshot)
     # fantasy_gameweek_player_ix <- get_fantasy_gameweek_player_ix(fantasy_snapshot, gameweek)
+    player_gameweek_history <- fplVirsnieks::create_player_gameweek_history(gameweek)
 
     # assign once-per-week objects
     state$fantasy_key <- fplVirsnieks::read_dt("fantasy_key.csv")
     state$fantasy_snapshot <- fantasy_snapshot
     # state$fantasy_season_player_ix <- fantasy_season_player_ix
     # state$fantasy_gameweek_player_ix <- fantasy_gameweek_player_ix
+    state$player_gameweek_history <- player_gameweek_history
 
     # set gw_update_time when gameweek updates are done
     state$gw_update_time <- Sys.time()
@@ -51,7 +53,7 @@ update_live_fpl <- function(state, full_update=F) {
   team_history <- fplVirsnieks::create_team_history(fpl_fixtures, fpl_teams)
 
   # fpl_live
-  json_fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_EVENT_URL, gameweek, "/live/"), flatten=T)
+  json_fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_LIVE_URL, gameweek, "/live/"), flatten=T)
 
   # assign to state
   state$season <- season
@@ -198,4 +200,28 @@ create_team_history <- function(fixtures, teams) {
     )
 
   return(team_hist)
+}
+
+#' Creates and returns player gameweek (not fixture) history
+#' @export
+create_player_gameweek_history <- function(gameweek) {
+  g <- seq(1, gameweek)
+  player_gameweek_history <-
+    rbindlist(
+      lapply(
+        g
+        , function(x) {
+          fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_LIVE_URL, x, "/live/"))$elements
+          n <- seq(1, nrow(fpl_live))
+          rbindlist(
+            lapply(
+              n
+              , function(y)
+                data.table(gw=x, id=fpl_live[y, "id"], fpl_live[y, "stats"])[ , explain := list(list(fpl_live$explain[[y]]))]
+            )
+          )
+        }
+      )
+    )
+  return(player_gameweek_history)
 }

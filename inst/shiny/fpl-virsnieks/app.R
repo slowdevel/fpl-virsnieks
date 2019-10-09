@@ -50,6 +50,16 @@ ui <- navbarPage(
     )
   ) # tabPanel Teams
 
+  , tabPanel(
+    "Players"
+
+    , fluidRow(
+      column( 6
+        , DT::DTOutput("dt_player_gameweek_history")
+      )
+    )
+  )
+
   , header = fluidRow(
     # season and gamewek info
     column( 12
@@ -130,6 +140,10 @@ server <- function(input, output, session) {
 
   output$dt_team_history <- DT::renderDT(
     fpl_state$team_history[ , -c("stats"), with=F]
+  )
+
+  output$dt_player_gameweek_history <- DT::renderDT(
+    fpl_state$player_gameweek_history[ , -c("explain"), with=F]
   )
 
   output$gw_details <- renderUI({

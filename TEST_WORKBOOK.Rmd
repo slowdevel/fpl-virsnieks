@@ -4,53 +4,76 @@ output: html_notebook
 ---
 
 ```{r}
-fpl_fixtures <- data.table(jsonlite::fromJSON("https://fantasy.premierleague.com/api/fixtures/"))
-fpl_fixtures[]
+fantasy_snapshot <- get_fantasy_snapshot (1920, 8)
+
+rbindlist(
+  lapply(
+    fantasy_snapshot
+    , function(x)
+        cbind(x$key[ , !("fantasy_team_name_original")], fantasy_team_name=x$team_name, x$history)
+  )
+)
 ```
+
 ```{r}
-team_ids <- sort(unique(fpl_fixtures[,team_h]))
-team_hist <- rbindlist(lapply(team_ids
-  , function(x) 
-    fpl_fixtures[
-    team_a==x | team_h==x
-    , .(
-      # original fixture fields
-      event
-      , id
-      , code
-      , kickoff_time
-      , started
-      , finished_provisional
-      , finished
-      , minutes
-      , provisional_start_time
-      , stats
-      # hame and away recalced to team and team_opp
-      , at_home = team_h==x
-      , team_id = ifelse(team_h==x, team_h, team_a)
-      , team_opp_id = ifelse(team_h==x, team_a, team_h)
-      , team_score = ifelse(team_h==x, team_h_score, team_a_score)
-      , team_opp_score = ifelse(team_h==x, team_a_score, team_h_score)
-      , team_difficulty = ifelse(team_h==x, team_h_difficulty, team_a_difficulty)
-      , team_opp_difficulty = ifelse(team_h==x, team_a_difficulty, team_h_difficulty)
-      )
-    ][
-      , ':=' (
-        wld = ifelse(team_score > team_opp_score, 1
-                     , ifelse(team_score < team_opp_score, -1, 0))
-        , points = ifelse(team_score > team_opp_score, 3
-                     , ifelse(team_score < team_opp_score, 0, 1))
-        , goal_difference = team_score - team_opp_score
-      )
-    ][
-      , ':=' (
-        cum_points = cumsum(points)
-      )
-      , team_id
-    ]
+fpl_now <- jsonlite::fromJSON(fplVirsnieks::FPL_NOW_URL)
+fpl_now$events
+```
+
+```{r}
+fpl_roster <- fplVirsnieks::create_fpl_roster(fpl_now)
+player_ids <- unique(fpl_roster$fpl_player_id)
+system.time(
+player_fixture_history <-
+  rbindlist(
+    lapply(
+      player_ids
+      , function(x)
+        data.table(jsonlite::fromJSON(paste0("https://fantasy.premierleague.com/api/element-summary/", x, "/"))$history)
+    )
+  )
 )
-)
-setkeyv(team_hist, c("team_id", "kickoff_time"))
-team_hist[]
+player_fixture_history[]
+```
+
+```{r}
+gameweek <- 8
+fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_LIVE_URL, gameweek, "/live/"))$elements
+n <- seq(1, nrow(fpl_live))
+player_gameweek_live <- 
+  rbindlist(
+    lapply(
+      n
+      , function(x)
+        data.table(gw=gameweek, id=fpl_live[x, "id"], fpl_live[x, "stats"])[ , explain := list(list(fpl_live$explain[[x]]))]
+    )
+  )
+player_gameweek_live
+```
+
+```{r}
+system.time({
+gameweek <- 8
+g <- seq(1, gameweek)
+player_gameweek_history <- 
+  rbindlist(
+    lapply(
+      g
+      , function(x) {
+        fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_LIVE_URL, x, "/live/"))$elements
+        n <- seq(1, nrow(fpl_live))
+        rbindlist(
+          lapply(
+            n
+            , function(y)
+              data.table(gw=x, id=fpl_live[y, "id"], fpl_live[y, "stats"])[ , explain := list(list(fpl_live$explain[[y]]))]
+          )
+        )
+      }
+    )
+  )
+
+}) # system.time()
+player_gameweek_history
 ```
 
