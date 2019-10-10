@@ -21,6 +21,8 @@ button_update_gw <- function(input, output, session, state) {
 button_update_live <- function(input, output, session, state) {
   observeEvent(input$button_click, {
     state <- fplVirsnieks::update_live_fpl(state, full_update=F)
+    # test write:
+    fplVirsnieks::write_dt(state$fpl_teams, "tiims.csv")
   })
   return(state)
 }
