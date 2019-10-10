@@ -37,3 +37,9 @@ button_counter <- function(input, output, session, x) {
   return(x)
 }
 
+#' button code for list files in wd
+#' @export
+button_list_files_wd <- function(input, output, session) {
+  return(list.files())
+}
+

@@ -21,13 +21,6 @@ ui <- navbarPage(
               , " Gameweek ", textOutput("gameweek", inline=T)
               , " ", textOutput("gw_status", inline=T)
             )
-            , fplVirsnieks::button_ui("button_update_gw", "Update GW")
-            , fplVirsnieks::button_ui("button_update_live", "Update Live")
-            , br()
-            , "Working directory: ", textOutput("wd")
-            , "Data directory: ", textOutput("data_dir")
-            , "System extdata directory: ", textOutput("system_dir")
-
     )
   ) # header
 
@@ -76,6 +69,17 @@ ui <- navbarPage(
         , DT::DTOutput("dt_player_gameweek_history")
       )
     )
+  )
+
+  , tabPanel(
+    "Admin"
+
+    , fplVirsnieks::button_ui("button_update_gw", "Update GW")
+    , fplVirsnieks::button_ui("button_update_live", "Update Live")
+    , br()
+    , "Working directory: ", textOutput("wd")
+    , "Data directory: ", textOutput("data_dir")
+    , "System extdata directory: ", textOutput("system_dir")
   )
 
   , footer = fluidRow(
