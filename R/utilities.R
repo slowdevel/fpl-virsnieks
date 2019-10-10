@@ -19,7 +19,7 @@ current_season <- function() {
   return(as.numeric(paste0(y, y+1)))
 }
 
-#' Gets .csv file via data.table::fread from /inst/extdata/directory
+#' Gets .csv file via data.table::fread from /inst/data/directory
 #' @export
 read_dt <- function(filename) {
   return(
@@ -28,5 +28,18 @@ read_dt <- function(filename) {
         "data"
         , filename
         , package="fplVirsnieks"))
+  )
+}
+
+#' Writes .csv file via data.table::fwrite to /inst/data/directory
+#' @export
+write_dt <- function(data, filename) {
+  data.table::fwrite(
+    data
+    , paste0(
+      # system.file("data", package="fplVirsnieks")
+      "../../data/"
+      ,filename
+      )
   )
 }
