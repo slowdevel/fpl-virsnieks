@@ -119,7 +119,7 @@ server <- function(input, output, session) {
       "data"
     )
   })
-  output$system_dir <- renderText({ system.file("extdata", package="fplVirsnieks")})
+  output$system_dir <- renderText({ system.file(".", package="fplVirsnieks")})
 
   output$launch_time <- renderText({ format(fpl_state$launch_time(), "%Y-%m-%d %H:%M:%S")})
   output$gw_update_time <- renderText({ format(fpl_state$gw_update_time, "%Y-%m-%d %H:%M:%S") })
@@ -131,13 +131,13 @@ server <- function(input, output, session) {
                       , choices = seq(1, 38) #fpl_state$gameweek)
                       , selected = fpl_state$gameweek)
     # populate manager dropdown with manager list for current season
-    manager_list <- fpl_state$fantasy_key[
-      season==fpl_state$season
-      , fantasy_manager
-      ]
-    updateSelectInput(session, "select_manager"
-                      , choices = setNames(seq(1,length(manager_list)), manager_list)
-                      , selected = 1)
+    # manager_list <- fpl_state$fantasy_key[
+    #   season==fpl_state$season
+    #   , fantasy_manager
+    #   ]
+    # updateSelectInput(session, "select_manager"
+    #                   , choices = setNames(seq(1,length(manager_list)), manager_list)
+    #                   , selected = 1)
   })
 
   gw_fixtures <- reactive(fplVirsnieks::query_gw_fixtures(
@@ -146,8 +146,7 @@ server <- function(input, output, session) {
   ))
 
   output$dt_fantasy_history <- DT::renderDT({
-    fpl_state$fantasy_snapshot[[as.numeric(input$select_manager)]]$history
-    # fpl_state$fantasy_key[season==fpl_state$season]
+    # fpl_state$fantasy_snapshot[[as.numeric(input$select_manager)]]$history
   })
 
   output$dt_fixtures <- DT::renderDT(
