@@ -120,7 +120,7 @@ server <- function(input, output, session) {
   output$data_dir <- renderText({
     list.files(
       # paste0(getwd(), "/data")
-      "data"
+      "../../data"
     )
   })
   output$system_dir <- renderText({ system.file(".", package="fplVirsnieks")})

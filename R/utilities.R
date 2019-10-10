@@ -31,7 +31,7 @@ read_dt <- function(filename) {
       paste0(
         # getwd()
         # ,"/data/"
-        "./data/"
+        "../../data/"
         , filename
       )
     )
@@ -48,7 +48,7 @@ write_dt <- function(data, filename) {
 
       # getwd()
       # , "/data/"
-      "./data/"
+      "../../data/"
       ,filename
       )
   )
