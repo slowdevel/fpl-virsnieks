@@ -115,7 +115,8 @@ server <- function(input, output, session) {
   output$wd <- renderText({ paste(getwd(), list.files()) })
   output$data_dir <- renderText({
     list.files(
-      paste0(getwd(), "/data")
+      # paste0(getwd(), "/data")
+      "data"
     )
   })
   output$system_dir <- renderText({ system.file("extdata", package="fplVirsnieks")})

@@ -29,8 +29,9 @@ read_dt <- function(filename) {
       #   , filename
       #   , package="fplVirsnieks"))
       paste0(
-        getwd()
-        ,"/data/"
+        # getwd()
+        # ,"/data/"
+        "data/"
         , filename
       )
     )
@@ -44,8 +45,10 @@ write_dt <- function(data, filename) {
     data
     , paste0(
       # system.file("extdata", package="fplVirsnieks")
-      getwd()
-      , "/data/"
+
+      # getwd()
+      # , "/data/"
+      "data/"
       ,filename
       )
   )
