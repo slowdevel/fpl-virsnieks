@@ -15,7 +15,7 @@ update_live_fpl <- function(state, full_update=F) {
   # tables from json
   fpl_teams <- data.table(json_fpl_now$teams)
 # test write:
-  fplVirsnieks::write_dt(fpl_teams, "teemzies.csv")
+  # fplVirsnieks::write_dt(fpl_teams, "teemzies.csv")
   # gameweek from fpl_now
   gameweek <- which(json_fpl_now$events$is_current == T)
 
