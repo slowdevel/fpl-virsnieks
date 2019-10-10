@@ -13,6 +13,21 @@ fpl_state <- reactiveValues(
 ui <- navbarPage(
   "fpl.grava.net"
 
+  , header = fluidRow(
+    # season and gamewek info
+    column( 12
+            , h4(
+              "Season", textOutput("season", inline=T)
+              , " Gameweek ", textOutput("gameweek", inline=T)
+              , " ", textOutput("gw_status", inline=T)
+            )
+            , fplVirsnieks::button_ui("button_update_gw", "Update GW")
+            , fplVirsnieks::button_ui("button_update_live", "Update Live")
+            , "Working directory: ", textOutput("wd", inline=T)
+
+    )
+  ) # header
+
   , tabPanel(
     "Fantasy"
 
@@ -60,29 +75,6 @@ ui <- navbarPage(
     )
   )
 
-  , header = fluidRow(
-    # season and gamewek info
-    column( 12
-      , h4(
-        "Season", textOutput("season", inline=T)
-        , " Gameweek ", textOutput("gameweek", inline=T)
-        , " ", textOutput("gw_status", inline=T)
-      )
-      , fplVirsnieks::button_ui("button_update_gw", "Update GW")
-      , fplVirsnieks::button_ui("button_update_live", "Update Live")
-
-    )
-    # splash screen
-    , waiter::use_waiter()
-    , waiter::show_waiter_on_load(
-      tagList(
-        waiter::spin_fading_circles()
-        , br()
-        , p(style="color: white", "loading FPL Virsnieks...")
-      )
-    )
-  ) # header
-
   , footer = fluidRow(
     column(
       12
@@ -93,6 +85,15 @@ ui <- navbarPage(
     ) # column
   ) # footer
 
+  # splash screen
+  , waiter::use_waiter()
+  , waiter::show_waiter_on_load(
+    tagList(
+      waiter::spin_fading_circles()
+      , br()
+      , p(style="color: white", "loading FPL Virsnieks...")
+    )
+  )
 )
 
 # Define server logic required to draw a histogram
@@ -107,6 +108,8 @@ server <- function(input, output, session) {
   output$season <- renderText({ fpl_state$season })
   output$gameweek <- renderText({ fpl_state$gameweek })
   output$gw_status <- renderText({ fpl_state$gameweek_status })
+
+  output$wd <- renderText({ getwd() })
 
   output$launch_time <- renderText({ format(fpl_state$launch_time(), "%Y-%m-%d %H:%M:%S")})
   output$gw_update_time <- renderText({ format(fpl_state$gw_update_time, "%Y-%m-%d %H:%M:%S") })
