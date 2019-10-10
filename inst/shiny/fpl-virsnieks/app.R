@@ -23,8 +23,10 @@ ui <- navbarPage(
             )
             , fplVirsnieks::button_ui("button_update_gw", "Update GW")
             , fplVirsnieks::button_ui("button_update_live", "Update Live")
-            , "Working directory: ", textOutput("wd", inline=T)
-            , "System extdata directory: ", textOutput("system_dir", inline=T)
+            , br()
+            , "Working directory: ", textOutput("wd")
+            , "Data directory: ", textOutput("data_dir")
+            , "System extdata directory: ", textOutput("system_dir")
 
     )
   ) # header
@@ -110,7 +112,12 @@ server <- function(input, output, session) {
   output$gameweek <- renderText({ fpl_state$gameweek })
   output$gw_status <- renderText({ fpl_state$gameweek_status })
 
-  output$wd <- renderText({ getwd() })
+  output$wd <- renderText({ paste(getwd(), list.files()) })
+  output$data_dir <- renderText({
+    list.files(
+      paste0(getwd(), "/../../extdata")
+    )
+  })
   output$system_dir <- renderText({ system.file("extdata", package="fplVirsnieks")})
 
   output$launch_time <- renderText({ format(fpl_state$launch_time(), "%Y-%m-%d %H:%M:%S")})
@@ -123,13 +130,13 @@ server <- function(input, output, session) {
                       , choices = seq(1, 38) #fpl_state$gameweek)
                       , selected = fpl_state$gameweek)
     # populate manager dropdown with manager list for current season
-    manager_list <- fpl_state$fantasy_key[
-      season==fpl_state$season
-      , fantasy_manager
-      ]
-    updateSelectInput(session, "select_manager"
-                      , choices = setNames(seq(1,length(manager_list)), manager_list)
-                      , selected = 1)
+  #   manager_list <- fpl_state$fantasy_key[
+  #     season==fpl_state$season
+  #     , fantasy_manager
+  #     ]
+  #   updateSelectInput(session, "select_manager"
+  #                     , choices = setNames(seq(1,length(manager_list)), manager_list)
+  #                     , selected = 1)
   })
 
   gw_fixtures <- reactive(fplVirsnieks::query_gw_fixtures(
