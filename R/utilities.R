@@ -24,10 +24,15 @@ current_season <- function() {
 read_dt <- function(filename) {
   return(
     data.table::fread(
-      system.file(
-        "data"
+      # system.file(
+      #   "data"
+      #   , filename
+      #   , package="fplVirsnieks"))
+      paste0(
+        "../../data/"
         , filename
-        , package="fplVirsnieks"))
+      )
+    )
   )
 }
 
