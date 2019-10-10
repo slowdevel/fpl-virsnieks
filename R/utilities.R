@@ -25,11 +25,12 @@ read_dt <- function(filename) {
   return(
     data.table::fread(
       # system.file(
-      #   "data"
+      #   "extdata"
       #   , filename
       #   , package="fplVirsnieks"))
       paste0(
-        "../../data/"
+        getwd()
+        ,"/../../extdata/"
         , filename
       )
     )
@@ -42,8 +43,9 @@ write_dt <- function(data, filename) {
   data.table::fwrite(
     data
     , paste0(
-      # system.file("data", package="fplVirsnieks")
-      "../../data/"
+      # system.file("extdata", package="fplVirsnieks")
+      getwd()
+      , "/../../extdata/"
       ,filename
       )
   )

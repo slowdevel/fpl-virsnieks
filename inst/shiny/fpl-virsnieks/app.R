@@ -24,6 +24,7 @@ ui <- navbarPage(
             , fplVirsnieks::button_ui("button_update_gw", "Update GW")
             , fplVirsnieks::button_ui("button_update_live", "Update Live")
             , "Working directory: ", textOutput("wd", inline=T)
+            , "System extdata directory: ", textOutput("system_dir", inline=T)
 
     )
   ) # header
@@ -110,6 +111,7 @@ server <- function(input, output, session) {
   output$gw_status <- renderText({ fpl_state$gameweek_status })
 
   output$wd <- renderText({ getwd() })
+  output$system_dir <- renderText({ system.file("extdata", package="fplVirsnieks")})
 
   output$launch_time <- renderText({ format(fpl_state$launch_time(), "%Y-%m-%d %H:%M:%S")})
   output$gw_update_time <- renderText({ format(fpl_state$gw_update_time, "%Y-%m-%d %H:%M:%S") })
