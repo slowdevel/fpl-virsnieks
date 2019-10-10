@@ -29,8 +29,8 @@ update_live_fpl <- function(state, full_update=F) {
     # player_gameweek_history <- fplVirsnieks::create_player_gameweek_history(gameweek)
 
     # assign once-per-week objects
-    # state$fantasy_key <- fplVirsnieks::read_dt("fantasy_key.csv")
-    # state$fantasy_snapshot <- fantasy_snapshot
+    state$fantasy_key <- fplVirsnieks::read_dt("fantasy_key.csv")
+    state$fantasy_snapshot <- fantasy_snapshot
     # state$fantasy_season_player_ix <- fantasy_season_player_ix
     # state$fantasy_gameweek_player_ix <- fantasy_gameweek_player_ix
     # state$player_gameweek_history <- player_gameweek_history
