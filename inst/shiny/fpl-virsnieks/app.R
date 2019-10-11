@@ -80,27 +80,29 @@ ui <- navbarPage(
     , "Working directory: ", textOutput("wd")
     , "Data directory: ", textOutput("data_dir")
     , "System extdata directory: ", textOutput("system_dir")
+    , fluidRow(
+      column(
+        12
+        , p(strong("System Start Time: "), textOutput("launch_time", inline=T)
+            , strong("Gameweek Update Time: "), textOutput("gw_update_time", inline=T)
+            , strong("Live Update Time: "), textOutput("live_update_time", inline=T)
+        ) # p
+      ) # column
+    )
   )
 
   , footer = fluidRow(
-    column(
-      12
-      , p(strong("System Start Time: "), textOutput("launch_time", inline=T)
-          , strong("Gameweek Update Time: "), textOutput("gw_update_time", inline=T)
-          , strong("Live Update Time: "), textOutput("live_update_time", inline=T)
-      ) # p
-    ) # column
   ) # footer
 
   # splash screen
-  , waiter::use_waiter()
-  , waiter::show_waiter_on_load(
-    tagList(
-      waiter::spin_fading_circles()
-      , br()
-      , p(style="color: white", "loading FPL Virsnieks...")
-    )
-  )
+  # , waiter::use_waiter()
+  # , waiter::show_waiter_on_load(
+  #   tagList(
+  #     waiter::spin_fading_circles()
+  #     , br()
+  #     , p(style="color: white", "loading fpl.grava.net")
+  #   )
+  # )
 )
 
 # Define server logic required to draw a histogram
@@ -135,13 +137,13 @@ server <- function(input, output, session) {
                       , choices = seq(1, 38) #fpl_state$gameweek)
                       , selected = fpl_state$gameweek)
     # populate manager dropdown with manager list for current season
-    # manager_list <- fpl_state$fantasy_key[
-    #   season==fpl_state$season
-    #   , fantasy_manager
-    #   ]
-    # updateSelectInput(session, "select_manager"
-    #                   , choices = setNames(seq(1,length(manager_list)), manager_list)
-    #                   , selected = 1)
+    manager_list <- fpl_state$fantasy_key[
+      season==fpl_state$season
+      , fantasy_manager
+      ]
+    updateSelectInput(session, "select_manager"
+                      , choices = setNames(seq(1,length(manager_list)), manager_list)
+                      , selected = 1)
   })
 
   gw_fixtures <- reactive(fplVirsnieks::query_gw_fixtures(
@@ -150,7 +152,7 @@ server <- function(input, output, session) {
   ))
 
   output$dt_fantasy_history <- DT::renderDT({
-    # fpl_state$fantasy_snapshot[[as.numeric(input$select_manager)]]$history
+    fpl_state$fantasy_snapshot[[as.numeric(input$select_manager)]]$history
   })
 
   output$dt_fixtures <- DT::renderDT(
@@ -176,7 +178,7 @@ server <- function(input, output, session) {
   })
 
   # hide splash screen
-  waiter::hide_waiter()
+  # waiter::hide_waiter()
 }
 
 # Run the application

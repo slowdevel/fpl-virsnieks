@@ -3,9 +3,14 @@ title: "PL Teams"
 output: html_notebook
 ---
 
+Fantasy History
 ```{r}
+# set working directory to that of shiny app
+setwd("/Users/robertsgrava/Documents/Coding/R/fplVirsnieks/inst/shiny/fpl-virsnieks")
+
 fantasy_snapshot <- get_fantasy_snapshot (1920, 8)
 
+fantasy_history <-
 rbindlist(
   lapply(
     fantasy_snapshot
@@ -13,6 +18,30 @@ rbindlist(
         cbind(x$key[ , !("fantasy_team_name_original")], fantasy_team_name=x$team_name, x$history)
   )
 )
+fantasy_history
+fwrite(fantasy_history, "../../data/fantasy_history.csv")
+
+fantasy_picks <-
+rbindlist(
+  lapply(
+    fantasy_snapshot
+    , function(x)
+        cbind(x$key[ , !("fantasy_team_name_original")], fantasy_team_name=x$team_name, x$picks)
+  )
+)
+fantasy_picks
+fwrite(fantasy_picks, "../../data/fantasy_picks.csv")
+
+fantasy_transfers <-
+rbindlist(
+  lapply(
+    fantasy_snapshot
+    , function(x)
+        cbind(x$key[ , !("fantasy_team_name_original")], fantasy_team_name=x$team_name, x$transfers)
+  )
+)
+fantasy_transfers
+fwrite(fantasy_picks, "../../data/fantasy_transfers.csv")
 ```
 
 ```{r}
@@ -20,7 +49,13 @@ fpl_now <- jsonlite::fromJSON(fplVirsnieks::FPL_NOW_URL)
 fpl_now$events
 ```
 
+Player Fixture History
 ```{r}
+# set working directory to that of shiny app
+setwd("/Users/robertsgrava/Documents/Coding/R/fplVirsnieks/inst/shiny/fpl-virsnieks")
+
+fpl_now <- jsonlite::fromJSON(fplVirsnieks::FPL_NOW_URL)
+
 fpl_roster <- fplVirsnieks::create_fpl_roster(fpl_now)
 player_ids <- unique(fpl_roster$fpl_player_id)
 system.time(
@@ -34,8 +69,11 @@ player_fixture_history <-
   )
 )
 player_fixture_history[]
+
+fwrite(player_fixture_history, "../../data/player_fixture_history.csv")
 ```
 
+Player Gameweek Live
 ```{r}
 gameweek <- 8
 fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_LIVE_URL, gameweek, "/live/"))$elements
@@ -51,7 +89,11 @@ player_gameweek_live <-
 player_gameweek_live
 ```
 
+Player Gameweek History
 ```{r}
+# set working directory to that of shiny app
+setwd("/Users/robertsgrava/Documents/Coding/R/fplVirsnieks/inst/shiny/fpl-virsnieks")
+
 system.time({
 gameweek <- 8
 g <- seq(1, gameweek)
@@ -75,5 +117,7 @@ player_gameweek_history <-
 
 }) # system.time()
 player_gameweek_history
+
+save(player_gameweek_history, file="../../data/player_gameweek_history.Rdata")
 ```
 

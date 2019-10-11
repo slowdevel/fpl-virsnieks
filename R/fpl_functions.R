@@ -1,14 +1,12 @@
-#' Updates live fpl_state
+#' Updates midweek fpl_state
 #'
-#' full_update parameter, T or F
+#' Does time-intensive calculations and persists to local data
+#' so they don't need to be done whenever reloading sessions
 #' @export
-update_live_fpl <- function(state, full_update=F) {
-  # waiter::show_waiter()
+update_midweek_fpl <- function() {
 
+  # current season
   season <- fplVirsnieks::current_season()
-
-  # -------------------------------------------------------------------------
-  # live fpl queries
 
   # fpl_now
   json_fpl_now <- jsonlite::fromJSON(fplVirsnieks::FPL_NOW_URL)
@@ -20,56 +18,120 @@ update_live_fpl <- function(state, full_update=F) {
   # fpl_roster
   fpl_roster <- create_fpl_roster(json_fpl_now)
 
-  # update once-per-gameweek info
-  if (full_update) {
-    # once-per-gameweek stuff
-    # fantasy_snapshot <- fplVirsnieks::get_fantasy_snapshot(season, gameweek)
-    # fantasy_season_player_ix <- get_fantasy_season_player_ix(fantasy_snapshot)
-    # fantasy_gameweek_player_ix <- get_fantasy_gameweek_player_ix(fantasy_snapshot, gameweek)
-    # player_gameweek_history <- fplVirsnieks::create_player_gameweek_history(gameweek)
+  # fantasy_snapshot
+  fantasy_snapshot <- fplVirsnieks::get_fantasy_snapshot(season, gameweek)
 
-    # assign once-per-week objects
-    state$fantasy_key <- fplVirsnieks::read_dt("fantasy_key.csv")
-    # state$fantasy_snapshot <- fantasy_snapshot
-    # state$fantasy_season_player_ix <- fantasy_season_player_ix
-    # state$fantasy_gameweek_player_ix <- fantasy_gameweek_player_ix
-    # state$player_gameweek_history <- player_gameweek_history
+  # fantasy_history
+  fantasy_history <-
+    rbindlist(
+      lapply(
+        fantasy_snapshot
+        , function(x)
+          cbind(x$key[ , !("fantasy_team_name_original")], fantasy_team_name=x$team_name, x$history)
+      )
+    )
+  fwrite(fantasy_history, "../../data/fantasy_history.csv")
 
-    # set gw_update_time when gameweek updates are done
-    state$gw_update_time <- Sys.time()
-  }
+  # fantasy_picks
+  fantasy_picks <-
+    rbindlist(
+      lapply(
+        fantasy_snapshot
+        , function(x)
+          cbind(x$key[ , !("fantasy_team_name_original")], fantasy_team_name=x$team_name, x$picks)
+      )
+    )
+  fwrite(fantasy_picks, "../../data/fantasy_picks.csv")
 
-  # fpl_fixtures
-  json_fpl_fixtures <- jsonlite::fromJSON(fplVirsnieks::FPL_FIXTURES_URL)
-  # table from json
-  fpl_fixtures <- fplVirsnieks::create_fpl_fixtures(json_fpl_fixtures, fpl_teams)
-  #gameweek status from fpl fixtures
-  gameweek_fixtures <- fpl_fixtures[event == gameweek]
-  gameweek_started <- sum(gameweek_fixtures$started) > 0
-  gameweek_finished <- sum(gameweek_fixtures$finished) == length(gameweek_fixtures$finished)
-  gameweek_final <- json_fpl_now$events$finished[gameweek] == T
-  gameweek_status_level <- 1 + gameweek_started + gameweek_finished + gameweek_final
-  gameweek_status <- fplVirsnieks::GAMEWEEK_STATUS_TEXT[gameweek_status_level]
+  # fantasy_transfers
+  fantasy_transfers <-
+    rbindlist(
+      lapply(
+        fantasy_snapshot
+        , function(x)
+          cbind(x$key[ , !("fantasy_team_name_original")], fantasy_team_name=x$team_name, x$transfers)
+      )
+    )
+  fwrite(fantasy_picks, "../../data/fantasy_transfers.csv")
+}
 
-  # team history
-  team_history <- fplVirsnieks::create_team_history(fpl_fixtures, fpl_teams)
+#' Updates live fpl_state
+#'
+#' full_update parameter, T or F
+#' @export
+update_live_fpl <- function(state, full_update=F) {
+  # waiter::show_waiter()
+  shiny::withProgress(message = 'Updating FPL Data', value = 0, {
+    incProgress(0, detail = "fpl_now")
+    season <- fplVirsnieks::current_season()
 
-  # fpl_live
-  json_fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_LIVE_URL, gameweek, "/live/"), flatten=T)
+    # -------------------------------------------------------------------------
+    # live fpl queries
 
-  # assign to state
-  state$season <- season
-  state$gameweek <- gameweek
-  state$gameweek_status <- gameweek_status
-  state$fpl_fixtures <- fpl_fixtures
-  state$fpl_roster <- fpl_roster
-  state$fpl_teams <- fpl_teams
-  state$team_history <- team_history
+    # fpl_now
+    json_fpl_now <- jsonlite::fromJSON(fplVirsnieks::FPL_NOW_URL)
+    # tables from json
+    fpl_teams <- data.table(json_fpl_now$teams)
+    # gameweek from fpl_now
+    gameweek <- which(json_fpl_now$events$is_current == T)
 
-  # set live_update_time when live updates are done
-  state$live_update_time <- Sys.time()
+    # fpl_roster
+    fpl_roster <- create_fpl_roster(json_fpl_now)
 
-  # waiter::hide_waiter()
+    shiny::incProgress(0.25, detail = "getting gameweek beginning data")
+    # update once-per-gameweek info
+    if (full_update) {
+      # once-per-gameweek stuff
+      fantasy_snapshot <- fplVirsnieks::get_fantasy_snapshot(season, gameweek)
+      # fantasy_season_player_ix <- get_fantasy_season_player_ix(fantasy_snapshot)
+      # fantasy_gameweek_player_ix <- get_fantasy_gameweek_player_ix(fantasy_snapshot, gameweek)
+      # player_gameweek_history <- fplVirsnieks::create_player_gameweek_history(gameweek)
+
+      # assign once-per-week objects
+      state$fantasy_key <- fplVirsnieks::read_dt("fantasy_key.csv")
+      state$fantasy_snapshot <- fantasy_snapshot
+      # state$fantasy_season_player_ix <- fantasy_season_player_ix
+      # state$fantasy_gameweek_player_ix <- fantasy_gameweek_player_ix
+      # state$player_gameweek_history <- player_gameweek_history
+
+      # set gw_update_time when gameweek updates are done
+      state$gw_update_time <- Sys.time()
+    }
+    shiny::incProgress(0.25, detail = "getting fixture data")
+
+    # fpl_fixtures
+    json_fpl_fixtures <- jsonlite::fromJSON(fplVirsnieks::FPL_FIXTURES_URL)
+    # table from json
+    fpl_fixtures <- fplVirsnieks::create_fpl_fixtures(json_fpl_fixtures, fpl_teams)
+    #gameweek status from fpl fixtures
+    gameweek_fixtures <- fpl_fixtures[event == gameweek]
+    gameweek_started <- sum(gameweek_fixtures$started) > 0
+    gameweek_finished <- sum(gameweek_fixtures$finished) == length(gameweek_fixtures$finished)
+    gameweek_final <- json_fpl_now$events$finished[gameweek] == T
+    gameweek_status_level <- 1 + gameweek_started + gameweek_finished + gameweek_final
+    gameweek_status <- fplVirsnieks::GAMEWEEK_STATUS_TEXT[gameweek_status_level]
+
+    # team history
+    team_history <- fplVirsnieks::create_team_history(fpl_fixtures, fpl_teams)
+
+    shiny::incProgress(0.25, detail = "getting fpl_live data")
+    # fpl_live
+    json_fpl_live <- jsonlite::fromJSON(paste0(fplVirsnieks::FPL_LIVE_URL, gameweek, "/live/"), flatten=T)
+
+    # assign to state
+    state$season <- season
+    state$gameweek <- gameweek
+    state$gameweek_status <- gameweek_status
+    state$fpl_fixtures <- fpl_fixtures
+    state$fpl_roster <- fpl_roster
+    state$fpl_teams <- fpl_teams
+    state$team_history <- team_history
+
+    # set live_update_time when live updates are done
+    state$live_update_time <- Sys.time()
+
+    shiny::incProgress(0.25, detail = "done")
+  }) # withProgress
   return(state)
 }
 
